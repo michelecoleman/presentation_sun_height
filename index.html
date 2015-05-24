@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sun height calculator</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Sun height calculator">
+  <meta name="author" content="Michele Coleman">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Sun height calculator</h1>
+    <h2>a Shiny app</h2>
+    <p>Michele Coleman<br/>May 23, 2015</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:#FEFF99;">
+  <article data-timings="">
+    <style type="text/css">
+.title-slide {
+  background-color: #FFF44F; /* #EDE0CF; ; #CA9F9D*/
+}
+
+.title-slide hgroup > h1, 
+.title-slide hgroup > h2 {
+  color: #222222 ;  /* ; #EF5150*/
+}
+
+slide:not(.segue) h2,h3{color: #222222}
+
+</style>
+
+<h2>Do I need a hat?</h2>
+
+<p>I know if I go out in the sun in July before about 5 PM, I&#39;ll burn, but I&#39;m not sure about October. Say today is October 5, it&#39;s 11 AM, and I&#39;m in Baltimore. Do I need a hat? Let&#39;s ask R.</p>
+
+<pre><code class="r">library(insol)
+july1_17 = ISOdate(2015,7,1,17,0,0,tz=&#39;US/Eastern&#39;)
+oct5_11 = ISOdate(2015,10,5,11,0,0,tz=&#39;US/Eastern&#39;)
+mytimes = rbind(july1_17,oct5_11)
+sunseries &lt;- sunpos(sunvector(JD(mytimes),latitude=39,longitude=-77,0))
+result = as.data.frame(cbind(mytimes,90-sunseries[,2]))
+colnames(result) = c(&#39;time&#39;,&#39;sun_angle&#39;)
+result$time &lt;- as.POSIXct(result$time, tz=&#39;US/Eastern&#39;, origin = &#39;1970-01-01&#39;)
+result
+</code></pre>
+
+<pre><code>##                         time sun_angle
+## july1_17 2015-07-01 17:00:00  39.47789
+## oct5_11  2015-10-05 11:00:00  38.63040
+</code></pre>
+
+<p>Answer: I should be cautious if the sun is above 39°. Right now the sun is approaching 39° but still rising (since it&#39;s before midday). I should wear a hat!</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:#FEFF99;">
+  <hgroup>
+    <h2>Solving for the entire year</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>I&#39;d like to know for the entire year what hours the sun is above 40°. Also sometimes I travel. The sun_calc app will tell me the local time of day that the sun passes through a given angle, at a given location, throughout the year. Here&#39;s the 40° sun angle times in Madrid:</p>
+
+<p><img src="assets/img/madrid_40degrees.png" alt="40° sun angle in Madrid"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:#FEFF99;">
+  <hgroup>
+    <h3>Usage tips</h3>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Want more sun exposure so you can increase your vitamin D production? Look for when the sun is higher than 50°.</li>
+<li>Set the angle to 0° for an estimate of sunrise and sunset time. The times shown would be correct if the earth did not have an atmosphere! But because air bends light you actually see the sun when it&#39;s below 0°. If you need more precise times try <a href="http://www.gaisma.com/en/">http://www.gaisma.com/en/</a> . </li>
+<li>For sunburn prevention you must choose your own value, based on your skin tone and personal susceptibility. Start with what times of day you feel safe in summer at your latitude to determine what angle is safe for you. Then you can extrapolate to other times of year and other places.<br></li>
+</ul>
+
+<h3>Known glitches in current version:</h3>
+
+<p>Straight lines connect NULL days in Southern winter &#9728; Tooltime reports dates as UTC but they are local time &#9728; Tooltip reports &quot;decimal&quot; time, e.g. &quot;19.75&quot; would mean clock time &quot;19:45&quot;.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:#FEFF99;">
+  <hgroup>
+    <h2>Ideas for improvements</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Try different graphics package. The current one displays time in decimal hours (4.75 instead of 4:45), draws connecting lines across dates in (Southern hemisphere) winters that have no crossings and should be blank, and incorrectly states that the dates are UTC when they are in fact local time</li>
+<li>More intelligent selection of axis limits, for consistency as selected input changes</li>
+<li>For Northern hemisphere, force plot to be for entire year, even if there are no crossings of that angle in winter</li>
+<li>Add title to graph, showing location &amp; angle chosen</li>
+<li>Allow user to input any latitude and longitude desired. Even better if the app could automatically figure out their time zone.</li>
+<li>Really awesome: Allow user to select a location by clicking on a map. Again ideally the app would figure out their time zone.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='NA'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Solving for the entire year'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Usage tips'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Ideas for improvements'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
